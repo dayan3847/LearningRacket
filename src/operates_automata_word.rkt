@@ -26,8 +26,6 @@
 
 (define (next automata current_state letter)
     (define automata_transitions (car automata))
-    (define automata_initial (cadr automata))
-    (define automata_finals (caddr automata))
     (define next_state (caddr (assoc (list current_state letter) automata_transitions)))
     next_state
 )
@@ -48,8 +46,6 @@
                 [next_state (caddr (assoc current_word automata_transitions))] ; next state
                 )
                 (operate automata next_state next_word) ; recursive call
-            )
-
             )
         )
     )
