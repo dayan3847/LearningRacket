@@ -1,65 +1,98 @@
 #lang racket
 
-; Word
-(define word '(0 1 0 1 1))
-; Automata
-(define automata '(((a 1 b) (a 0 a) (b 1 a) (b 0 b)) a (b) ))
-; Automata transitions
-(define automata_transitions (car automata))
-; Automata initial state
-(define automata_initial (cadr automata))
-; Automata final states
-(define automata_finals (caddr automata))
-
-; display automata_transitions
-(display "automata transitions: ")
-(display automata_transitions)
-(newline)
-; display automata_initial
-(display "automata initial: ")
-(display automata_initial)
-(newline)
-; display automata_finals
-(display "automata finals: ")
-(display automata_finals)
-(newline)
-
-(define (next automata current_state letter)
-    (define automata_transitions (car automata))
-    (define next_state (caddr (assoc (list current_state letter) automata_transitions)))
-    next_state
-)
-
-(define (operate automata current_state word)
-    (define automata_finals (caddr automata))
-    (cond
-        ([null? word] ; if word is empty
-            (cond
-                ([member current_state automata_finals] #t) ; if current state is final
-                (else #f) ; if current state is not final
+; buscar transicion
+(define (find_transition automata_transitions state letter)
+    (if (null? automata_transitions)
+        #f
+        (let (  
+                ; primer trio
+                [i_transition (car automata_transitions)]
+                ; el resto de la lista
+                [transition_rest (cdr automata_transitions)]
             )
-        )
-        (else ; if word is not empty
             (let (
-                [current_letter (car word)] ; current letter
-                [next_word (cdr word)] ; next word
-                [next_state (caddr (assoc current_word automata_transitions))] ; next state
+                    ; estado de origen
+                    [i_transition_status_from (car i_transition)]
+                    ; letra
+                    [i_transition_letter (cadr i_transition)]
+                    ; estado destino
+                    [i_transition_status_to (caddr i_transition)]
                 )
-                (operate automata next_state next_word) ; recursive call
+                (if (and 
+                        (equal? i_transition_status_from state) 
+                        (equal? i_transition_letter letter))
+                    i_transition_status_to
+                    (find_transition transition_rest state letter)
+                )
             )
         )
     )
 )
 
-(display "no word in state a: ")
-(operate automata 'a '())
-(newline)
-(display "no word in state b: ")
-(operate automata 'b '())
-(newline)
+(define (get_next_state automata letter current_state)
+    (let (
+            [automata_transitions (car automata)]
+        )
+        (let (
+                [next_state (find_transition automata_transitions current_state letter)]
+            )
+            next_state
+        )
+    )
+)
 
-;(define transiciones (car automata))
-;(define inicial (cadr automata))
-;(define finales (caddr automata))
-;(verifica transiciones inicial finales palabra))
-;(opera automata palabra)
+
+(define (operate_recursive automata word current_state)
+    (let (
+            [automata_finals (caddr automata)] ; estado final del automata (automata[2])
+        )
+        (if (null? word)
+            ; si la palabra esta vacia, verificamos si el estado actual es final      
+            (if [member current_state automata_finals] #t #f)
+            ; si la palabra no esta vacia:
+            (let (
+                    [current_letter (car word)] ; current letter
+                    [next_word (cdr word)] ; next word
+                )
+                (let (
+                        [next_state (get_next_state automata current_letter current_state)] ; next state
+                    )
+                    (operate_recursive automata next_word next_state) ; recursive call
+                )
+            )
+        )
+    )
+)
+
+
+(define (operate automata word)
+    (let (
+            [automata_initial (cadr automata)] ; estado inicial del automata (automata[1])
+        )
+        (operate_recursive automata word automata_initial)
+    )
+)
+
+; Word
+(define my_word '(0 1 0 1 1))
+; Automata
+(define my_automata '(((a 1 b) (a 0 a) (b 1 a) (b 0 b)) a (b) ))
+
+
+
+(define (test_operate my_automata word)
+    (display "word: ")
+    (display word)
+    (newline)
+    (display "operate automata")
+    (newline)
+    (display (operate my_automata word))
+    (newline)
+    (newline)
+)
+
+(test_operate my_automata my_word)
+
+(test_operate my_automata '(0 1))
+(test_operate my_automata '(0 1 0 1 1 0 1))
+(test_operate my_automata '(0 1 0 1))
