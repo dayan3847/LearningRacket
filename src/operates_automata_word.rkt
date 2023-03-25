@@ -1,5 +1,13 @@
 #lang racket
 
+; Automata
+(define my_automata '( 
+                ((a 1 b) (a 0 a) (b 1 a) (b 0 b))  ; trans
+                a                                   ; initial status
+                (b)                                 ; final status
+                ) 
+)
+
 ; buscar transicion
 (define (find_transition automata_transitions state letter)
     (if (null? automata_transitions)
@@ -29,6 +37,9 @@
     )
 )
 
+; test find_transition
+; (find_transition '( (a 1 b) (a 0 a) (b 1 a) (b 0 b) ) 'b 1)
+
 (define (get_next_state automata letter current_state)
     (let (
             [automata_transitions (car automata)]
@@ -40,6 +51,23 @@
         )
     )
 )
+
+; ; test get_next_state
+; (display "(get_next_state my_automata 1 'a)")
+; (newline)
+; (get_next_state my_automata 1 'a)
+
+; (display "(get_next_state my_automata 1 'b)")
+; (newline)
+; (get_next_state my_automata 1 'b)
+
+; (display "(get_next_state my_automata 0 'a)")
+; (newline)
+; (get_next_state my_automata 0 'a)
+
+; (display "(get_next_state my_automata 0 'b)")
+; (newline)
+; (get_next_state my_automata 0 'b)
 
 
 (define (operate_recursive automata word current_state)
@@ -65,6 +93,11 @@
 )
 
 
+; (operate_recursive my_automata '() 'a)
+; (operate_recursive my_automata '() 'b)
+; (operate_recursive my_automata '(1) 'a)
+
+
 (define (operate automata word)
     (let (
             [automata_initial (cadr automata)] ; estado inicial del automata (automata[1])
@@ -72,12 +105,6 @@
         (operate_recursive automata word automata_initial)
     )
 )
-
-; Word
-(define my_word '(0 1 0 1 1))
-; Automata
-(define my_automata '(((a 1 b) (a 0 a) (b 1 a) (b 0 b)) a (b) ))
-
 
 
 (define (test_operate my_automata word)
@@ -91,8 +118,12 @@
     (newline)
 )
 
+; Word
+(define my_word '(0 1 0 1 1))
+
+
 (test_operate my_automata my_word)
 
 (test_operate my_automata '(0 1))
-(test_operate my_automata '(0 1 0 1 1 0 1))
-(test_operate my_automata '(0 1 0 1))
+
+(test_operate my_automata '(0 0 0 1 1 1 0 0 1 0 0 1))
